@@ -1,6 +1,5 @@
 import Layout from '@/components/layout';
 import { useEffect, useState } from 'react';
-// import products from '../lib/data.json';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 
