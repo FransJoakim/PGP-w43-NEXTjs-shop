@@ -2,11 +2,8 @@ import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 import {
   collection,
-  query,
   updateDoc,
-  setDoc,
   doc,
-  getDoc,
   getDocs,
   increment,
 } from 'firebase/firestore';
@@ -21,7 +18,7 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+export const db = getFirestore(app);
 
 export const getUtterances = async () => {
   const collectionRef = collection(db, 'quotes');

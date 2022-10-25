@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { getUtterances, incrementCounterDB } from '../lib/firebase';
+import Quote from '@/components/Quote';
 
-interface Quote {
+export interface QuoteInterface {
   categories: string[];
   created_at: Date;
   icon_url: string;
@@ -10,21 +10,16 @@ interface Quote {
   url: string;
   value: string;
   utterances?: number;
+  comments?: string[];
 }
 
 interface QuotesArray {
   total: number;
-  result: Quote[];
-}
-
-export interface UtteranceDataInterface {
-  id: string;
-  charlieUttrance: number;
+  result: QuoteInterface[];
 }
 
 export default function () {
   const [quotes, setQuotes] = useState<QuotesArray>({ total: 0, result: [] });
-  const [quotesWithCount, setQuotesWithCount] = useState<Quote[]>([]);
 
   useEffect(() => {
     fetch('https://api.chucknorris.io/jokes/search?query=hand')
@@ -32,48 +27,11 @@ export default function () {
       .then((json) => setQuotes(json));
   }, []);
 
-  useEffect(() => {
-    const updateWithUtterances = async () => {
-      const utteranceList = await getUtterances();
-      const updatedQuotes = quotes.result.map((quote) => {
-        quote.utterances = utteranceList.find(
-          (q: UtteranceDataInterface) => q.id === quote.id,
-        ).charlieUttrance;
-        return quote;
-      });
-
-      setQuotesWithCount(updatedQuotes);
-    };
-    updateWithUtterances();
-  }, [quotes]);
-
-  const incrementCounter = (id: string) => {
-    incrementCounterDB(id);
-    const temp = quotesWithCount.map((quote) => {
-      if (quote.id === id) {
-        //@ts-ignore
-        return { ...quote, utterances: quote.utterances + 1 };
-      } else return quote;
-    });
-    setQuotesWithCount(temp);
-  };
-
   return (
     <div className="flex w-full justify-center">
       <ul className="mt-8 w-4/5">
-        {quotesWithCount.map((quote, index) => {
-          return (
-            <li className="mt-12" key={index}>
-              <p>{quote.value}</p>
-              <button
-                className="text-sm"
-                onClick={() => incrementCounter(quote.id)}
-              >
-                <b># Charlie uttarances: {quote.utterances}</b>
-                <p>{quote.id}</p>
-              </button>
-            </li>
-          );
+        {quotes.result.map((quote, index) => {
+          return <Quote rawQuote={quote} key={index} />;
         })}
       </ul>
     </div>
