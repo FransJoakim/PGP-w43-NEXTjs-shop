@@ -1,6 +1,7 @@
+import { MouseEvent } from 'react';
 import { useEffect, useState } from 'react';
 import { QuoteInterface } from '../pages/quotes';
-import { db, incrementCounterDB } from '../lib/firebase';
+import { db, incrementCounterDB, addComment } from '../lib/firebase';
 import { doc, collection, getDocs, onSnapshot } from 'firebase/firestore';
 
 export default function Quote({ rawQuote }: { rawQuote: QuoteInterface }) {
@@ -38,15 +39,20 @@ export default function Quote({ rawQuote }: { rawQuote: QuoteInterface }) {
     fetchComments();
   }, [quote]);
 
-  if (comments.length > 0) {
-    console.log(comments);
-  }
+  const handleClick = (e: MouseEvent) => {
+    e.preventDefault();
+    const id = addComment(rawQuote.id, newComment);
+    setComments((prevComments) => [...prevComments, newComment]);
+    setNewComment('');
+    setInsertingNewComment(false);
+  };
 
   return (
     <>
       {quote && (
         <li className="mt-12">
           <p>{quote.value}</p>
+          <p>{quote.id}</p>
           <button
             className="text-sm"
             onClick={() => incrementCounterDB(quote.id)}
@@ -76,7 +82,7 @@ export default function Quote({ rawQuote }: { rawQuote: QuoteInterface }) {
                   value={newComment}
                   onChange={(e) => setNewComment(e.target.value)}
                 />
-                <button>Add</button>
+                <button onClick={handleClick}>Add</button>
               </div>
             )}
           </div>

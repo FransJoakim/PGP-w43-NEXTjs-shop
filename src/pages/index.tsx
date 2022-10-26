@@ -2,6 +2,7 @@ import Layout from '@/components/layout';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
+import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 
 export interface productsInterface {
   id: number;
@@ -12,22 +13,14 @@ export interface productsInterface {
   image: string;
 }
 
-export default function IndexPage() {
+export default function IndexPage({
+  data,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
-  const [productsList, setProductsList] = useState<productsInterface[]>([]);
+  const [productsList] = useState<productsInterface[]>(data);
   const [categories, setCategories] = useState<string[]>([]);
-  const [filteredProductsList, setFilteredProductsList] = useState<
-    productsInterface[]
-  >([]);
-
-  useEffect(() => {
-    fetch('https://fakestoreapi.com/products')
-      .then((res) => res.json())
-      .then((json) => {
-        setProductsList(json);
-        setFilteredProductsList(json);
-      });
-  }, []);
+  const [filteredProductsList, setFilteredProductsList] =
+    useState<productsInterface[]>(data);
 
   useEffect(() => {
     let temp: string[] = [];
@@ -114,3 +107,12 @@ export default function IndexPage() {
     </Layout>
   );
 }
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const products = await fetch('https://fakestoreapi.com/products');
+  return {
+    props: {
+      data: await products.json(),
+    },
+  };
+};

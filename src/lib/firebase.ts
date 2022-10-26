@@ -3,6 +3,7 @@ import { getFirestore } from 'firebase/firestore';
 import {
   collection,
   updateDoc,
+  addDoc,
   doc,
   getDocs,
   increment,
@@ -20,22 +21,17 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
 
-export const getUtterances = async () => {
-  const collectionRef = collection(db, 'quotes');
-  const collectionSnap = await getDocs(collectionRef);
-  const utterances: any = [];
-  collectionSnap.forEach((doc) =>
-    utterances.push({
-      id: doc.id,
-      charlieUttrance: doc.data().charlieUttrance,
-    }),
-  );
-  return utterances;
-};
-
 export const incrementCounterDB = async (id: string) => {
   const quoteRef = doc(db, 'quotes', id);
   await updateDoc(quoteRef, {
     charlieUttrance: increment(1),
   });
+};
+
+export const addComment = async (quoteId: string, comment: string) => {
+  const commentRef = collection(db, 'quotes', quoteId, 'comments');
+  const result = await addDoc(commentRef, {
+    value: comment,
+  });
+  return result.id;
 };
