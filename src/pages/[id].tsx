@@ -1,14 +1,11 @@
 import Image from 'next/image';
 import Link from 'next/link';
-
-import { useState } from 'react';
+import { InferGetStaticPropsType, GetStaticProps, GetStaticPaths } from 'next';
 import { productsInterface } from './index';
-
-import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 
 export default function ProductInfo({
   data,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) {
+}: InferGetStaticPropsType<typeof getStaticProps>) {
   return (
     <>
       <Link href="/">
@@ -39,9 +36,20 @@ export default function ProductInfo({
   );
 }
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const id = context.params?.id;
-  const products = await fetch(`https://fakestoreapi.com/products/${id}`);
+export const getStaticPaths: GetStaticPaths = async () => {
+  const products = await fetch('https://fakestoreapi.com/products').then(
+    (res) => res.json(),
+  );
+  const paths = products.map((product: productsInterface) => ({
+    params: { id: product.id.toString() },
+  }));
+  return { paths, fallback: false };
+};
+
+export const getStaticProps: GetStaticProps = async ({ params }) => {
+  const products = await fetch(
+    `https://fakestoreapi.com/products/${params?.id}`,
+  );
   return {
     props: {
       data: await products.json(),

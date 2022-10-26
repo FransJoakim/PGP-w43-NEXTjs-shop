@@ -2,7 +2,7 @@ import Layout from '@/components/layout';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
-import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
+import { InferGetStaticPropsType, GetStaticProps } from 'next';
 
 export interface productsInterface {
   id: number;
@@ -15,7 +15,7 @@ export interface productsInterface {
 
 export default function IndexPage({
   data,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) {
+}: InferGetStaticPropsType<typeof getStaticProps>) {
   const router = useRouter();
   const [productsList] = useState<productsInterface[]>(data);
   const [categories, setCategories] = useState<string[]>([]);
@@ -108,7 +108,7 @@ export default function IndexPage({
   );
 }
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
+export const getStaticProps: GetStaticProps = async (context) => {
   const products = await fetch('https://fakestoreapi.com/products');
   return {
     props: {
