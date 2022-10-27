@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore';
+import { getFirestore, setDoc } from 'firebase/firestore';
 import {
   collection,
   updateDoc,
@@ -29,7 +29,12 @@ export const incrementCounterDB = async (id: string) => {
 };
 
 export const addComment = async (quoteId: string, comment: string) => {
+  const quoteRef = doc(db, 'quotes', quoteId);
+  await updateDoc(quoteRef, {
+    commentsCount: increment(1),
+  });
   const commentRef = collection(db, 'quotes', quoteId, 'comments');
+
   const result = await addDoc(commentRef, {
     value: comment,
   });

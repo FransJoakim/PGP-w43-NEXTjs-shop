@@ -11,6 +11,7 @@ export interface QuoteInterface {
   value: string;
   utterances?: number;
   comments?: string[];
+  commentsCount?: number;
 }
 
 interface QuotesArray {

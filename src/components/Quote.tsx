@@ -5,11 +5,11 @@ import { db, incrementCounterDB, addComment } from '../lib/firebase';
 import { doc, collection, getDocs, onSnapshot } from 'firebase/firestore';
 
 export default function Quote({ rawQuote }: { rawQuote: QuoteInterface }) {
+  const [hasFetched, setHasFetched] = useState(false);
   const [quote, setQuote] = useState<any>(undefined);
   const [comments, setComments] = useState<string[]>([]);
 
-  const [insertingNewComment, setInsertingNewComment] =
-    useState<boolean>(false);
+  const [isInsertingComment, setIsInsertingComment] = useState<boolean>(false);
   const [newComment, setNewComment] = useState<string>('');
 
   useEffect(() => {
@@ -18,33 +18,40 @@ export default function Quote({ rawQuote }: { rawQuote: QuoteInterface }) {
         setQuote({
           ...rawQuote,
           utterances: doc.data().charlieUttrance,
+          commentsCount: doc.data().commentsCount,
         });
+        setHasFetched(true);
       }
     });
     return unsub;
   }, []);
 
   useEffect(() => {
-    const temp: any = [];
+    if (hasFetched) {
+      if (quote.commentsCount) {
+        const temp: any = [];
 
-    const fetchComments = async () => {
-      const querySnapshot = await getDocs(
-        collection(db, 'quotes', rawQuote.id, 'comments'),
-      );
-      querySnapshot.forEach((doc) => {
-        temp.push(doc.data().value);
-      });
-      setComments(temp);
-    };
-    fetchComments();
-  }, [quote]);
+        const fetchComments = async () => {
+          const querySnapshot = await getDocs(
+            collection(db, 'quotes', rawQuote.id, 'comments'),
+          );
+          querySnapshot.forEach((doc) => {
+            console.log(doc.data());
+            temp.push(doc.data().value);
+          });
+          setComments(temp);
+        };
+        fetchComments();
+      }
+    }
+  }, [hasFetched]);
 
   const handleClick = (e: MouseEvent) => {
     e.preventDefault();
     const id = addComment(rawQuote.id, newComment);
     setComments((prevComments) => [...prevComments, newComment]);
     setNewComment('');
-    setInsertingNewComment(false);
+    setIsInsertingComment(false);
   };
 
   return (
@@ -70,12 +77,12 @@ export default function Quote({ rawQuote }: { rawQuote: QuoteInterface }) {
                 })}
               </ul>
             )}
-            {!insertingNewComment && (
-              <button onClick={() => setInsertingNewComment(true)}>
+            {!isInsertingComment && (
+              <button onClick={() => setIsInsertingComment(true)}>
                 <i>Add comment</i>
               </button>
             )}
-            {insertingNewComment && (
+            {isInsertingComment && (
               <div>
                 <input
                   type="text"
