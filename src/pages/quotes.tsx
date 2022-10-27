@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import Quote from '@/components/Quote';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/router';
 
 export interface QuoteInterface {
   categories: string[];
@@ -20,6 +22,9 @@ interface QuotesArray {
 }
 
 export default function () {
+  const router = useRouter();
+  const { data: session, status } = useSession();
+
   const [quotes, setQuotes] = useState<QuotesArray>({ total: 0, result: [] });
 
   useEffect(() => {
@@ -27,6 +32,12 @@ export default function () {
       .then((res) => res.json())
       .then((json) => setQuotes(json));
   }, []);
+
+  useEffect(() => {
+    if (status !== 'loading' && status !== 'authenticated') {
+      router.push('/login');
+    }
+  }, [status]);
 
   return (
     <div className="flex w-full justify-center">

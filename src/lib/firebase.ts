@@ -1,11 +1,11 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore, setDoc } from 'firebase/firestore';
 import {
+  getFirestore,
   collection,
   updateDoc,
   addDoc,
-  doc,
   getDocs,
+  doc,
   increment,
 } from 'firebase/firestore';
 
@@ -28,15 +28,33 @@ export const incrementCounterDB = async (id: string) => {
   });
 };
 
-export const addComment = async (quoteId: string, comment: string) => {
+export const addComment = async (
+  quoteId: string,
+  comment: {
+    value: string;
+    author: string;
+  },
+) => {
   const quoteRef = doc(db, 'quotes', quoteId);
   await updateDoc(quoteRef, {
     commentsCount: increment(1),
   });
   const commentRef = collection(db, 'quotes', quoteId, 'comments');
 
-  const result = await addDoc(commentRef, {
-    value: comment,
-  });
+  const result = await addDoc(commentRef, comment);
   return result.id;
+};
+
+export const authorizeUser = async (userEmail: string) => {
+  let blackListed = false;
+
+  const blackListRef = collection(db, 'blacklist');
+  const blackList = await getDocs(blackListRef);
+  blackList.forEach((blacklistedEmail) => {
+    //@ts-ignore
+    if (userEmail === blacklistedEmail.data()) {
+      blackListed = true;
+    }
+  });
+  return !blackListed;
 };
