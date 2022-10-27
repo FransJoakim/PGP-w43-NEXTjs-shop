@@ -7,7 +7,9 @@ import {
   getDocs,
   doc,
   increment,
+  setDoc,
 } from 'firebase/firestore';
+import { commentInterface } from '../components/Quote';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyBDHDVPELgDqBJTk19vtX6QiHbCFjPvU1A',
@@ -30,10 +32,7 @@ export const incrementCounterDB = async (id: string) => {
 
 export const addComment = async (
   quoteId: string,
-  comment: {
-    value: string;
-    author: string;
-  },
+  comment: commentInterface,
 ) => {
   const quoteRef = doc(db, 'quotes', quoteId);
   await updateDoc(quoteRef, {
@@ -52,9 +51,15 @@ export const authorizeUser = async (userEmail: string) => {
   const blackList = await getDocs(blackListRef);
   blackList.forEach((blacklistedEmail) => {
     //@ts-ignore
-    if (userEmail === blacklistedEmail.data()) {
+    if (userEmail === blacklistedEmail.id) {
       blackListed = true;
     }
   });
   return !blackListed;
+};
+
+export const blacklist = async (email: string) => {
+  const blackListRef = doc(db, 'blacklist', email);
+  await setDoc(blackListRef, {});
+  return true;
 };

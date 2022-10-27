@@ -1,5 +1,14 @@
-import { MouseEvent } from 'react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, MouseEvent } from 'react';
+import {
+  doc,
+  collection,
+  onSnapshot,
+  query,
+  serverTimestamp,
+  FieldValue,
+  orderBy,
+} from 'firebase/firestore';
+import { useSession } from 'next-auth/react';
 import { QuoteInterface } from '../pages/quotes';
 import {
   db,
@@ -7,12 +16,11 @@ import {
   addComment,
   authorizeUser,
 } from '../lib/firebase';
-import { doc, collection, getDocs, onSnapshot } from 'firebase/firestore';
-import { useSession } from 'next-auth/react';
 
-interface commentInterface {
+export interface commentInterface {
   value: string;
   author: string;
+  createdAt: FieldValue;
 }
 
 export default function Quote({ rawQuote }: { rawQuote: QuoteInterface }) {
@@ -24,7 +32,7 @@ export default function Quote({ rawQuote }: { rawQuote: QuoteInterface }) {
   const [comments, setComments] = useState<commentInterface[]>([]);
   const [isInsertingComment, setIsInsertingComment] = useState<boolean>(false);
   const [newComment, setNewComment] = useState<string>('');
-  // const [canComment] = useState(authorizeUser(session.user.email));
+  const [canComment, setCanComment] = useState(true);
 
   useEffect(() => {
     const unsub = onSnapshot(doc(db, 'quotes', rawQuote.id), (doc) => {
@@ -37,26 +45,34 @@ export default function Quote({ rawQuote }: { rawQuote: QuoteInterface }) {
         setHasFetched(true);
       }
     });
+
+    const authorize = async () => {
+      setCanComment(await authorizeUser(session.user.email));
+    };
+    authorize();
+
     return unsub;
   }, []);
 
   useEffect(() => {
+    let unsubscribe;
     if (hasFetched) {
       if (quote.commentsCount) {
-        const temp: any = [];
-
-        const fetchComments = async () => {
-          const querySnapshot = await getDocs(
-            collection(db, 'quotes', rawQuote.id, 'comments'),
-          );
+        const q = query(
+          collection(db, 'quotes', rawQuote.id, 'comments'),
+          orderBy('createdAt'),
+        );
+        unsubscribe = onSnapshot(q, (querySnapshot) => {
+          const temp: commentInterface[] = [];
           querySnapshot.forEach((doc) => {
-            temp.push(doc.data().value);
+            //@ts-ignore
+            temp.push(doc.data());
           });
           setComments(temp);
-        };
-        fetchComments();
+        });
       }
     }
+    return unsubscribe;
   }, [hasFetched]);
 
   const handleClick = (e: MouseEvent) => {
@@ -64,6 +80,7 @@ export default function Quote({ rawQuote }: { rawQuote: QuoteInterface }) {
     const comment: commentInterface = {
       value: newComment,
       author: session.user.email,
+      createdAt: serverTimestamp(),
     };
 
     const id = addComment(rawQuote.id, comment);
@@ -77,7 +94,6 @@ export default function Quote({ rawQuote }: { rawQuote: QuoteInterface }) {
       {quote && (
         <li className="mt-12">
           <p>{quote.value}</p>
-          <p>{quote.id}</p>
           <button
             className="text-sm"
             onClick={() => incrementCounterDB(quote.id)}
@@ -99,8 +115,7 @@ export default function Quote({ rawQuote }: { rawQuote: QuoteInterface }) {
                 })}
               </ul>
             )}
-            {!isInsertingComment && (
-              //!!canComment &&
+            {!isInsertingComment && !!canComment && (
               <button onClick={() => setIsInsertingComment(true)}>
                 <i>Add comment</i>
               </button>

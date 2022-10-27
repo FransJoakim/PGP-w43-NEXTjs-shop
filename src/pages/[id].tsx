@@ -32,6 +32,11 @@ export default function ProductInfo({
           </div>
         </div>
       </main>
+      <Link href="/quotes">
+        <div className="chuck">
+          <Image src="/chuck.webp" alt="Chuck" height="250px" width="210px" />
+        </div>
+      </Link>
     </>
   );
 }

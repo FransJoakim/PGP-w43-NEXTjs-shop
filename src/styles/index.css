@@ -1,5 +1,115 @@
-/* purgecss start ignore */
 @tailwind base;
 @tailwind components;
-/* purgecss end ignore */
 @tailwind utilities;
+
+.chuck {
+  position: absolute;
+  transform: rotate(0.01turn);
+  bottom: -9rem;
+  animation: stroll 7s infinite;
+}
+
+.chuck:hover {
+  animation-play-state: paused;
+}
+
+@keyframes stroll {
+  0% {
+    right: 10%;
+    rotate: 0.01turn;
+  }
+  10% {
+    right: 18%;
+    rotate: -0.01turn;
+  }
+  20% {
+    right: 26%;
+    rotate: 0.01turn;
+  }
+  30% {
+    right: 34%;
+    rotate: -0.01turn;
+  }
+  40% {
+    right: 42%;
+    rotate: 0.01turn;
+  }
+  50% {
+    right: 50%;
+    rotate: -0.01turn;
+  }
+  60% {
+    right: 58%;
+    rotate: 0.01turn;
+  }
+  70% {
+    right: 66%;
+    rotate: -0.01turn;
+  }
+  80% {
+    right: 74%;
+    rotate: 0.01turn;
+  }
+  90% {
+    right: 82%;
+    rotate: -0.01turn;
+  }
+  100% {
+    right: 90%;
+    rotate: 0.01turn;
+  }
+}
+
+.little-chuck {
+  position: absolute;
+  transform: rotate(0.01turn);
+  top: 1rem;
+  animation: little-stroll 7s infinite alternate;
+}
+
+@keyframes little-stroll {
+  0% {
+    left: 10%;
+    rotate: 0.01turn;
+  }
+  10% {
+    left: 18%;
+    rotate: -0.01turn;
+  }
+  20% {
+    left: 26%;
+    rotate: 0.01turn;
+  }
+  30% {
+    left: 34%;
+    rotate: -0.01turn;
+  }
+  40% {
+    left: 42%;
+    rotate: 0.01turn;
+  }
+  50% {
+    left: 50%;
+    rotate: -0.01turn;
+  }
+  60% {
+    left: 58%;
+    rotate: 0.01turn;
+  }
+  70% {
+    left: 66%;
+    rotate: -0.01turn;
+  }
+  80% {
+    left: 74%;
+    rotate: 0.01turn;
+  }
+  90% {
+    left: 82%;
+    rotate: -0.01turn;
+  }
+  100% {
+    left: 90%;
+    rotate: 0.01turn;
+  }
+}
